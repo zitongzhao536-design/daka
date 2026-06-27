@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOPIK 5级备考打卡表</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; padding: 24px 16px; }
+
+.container { max-width: 720px; margin: 0 auto; }
+
+h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.subtitle { font-size: 14px; color: #888; margin-bottom: 24px; }
+
+.week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.week-nav button { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 7px 16px; cursor: pointer; font-size: 14px; color: #333; }
+.week-nav button:hover { background: #f0f0ee; }
+.week-label { font-size: 15px; font-weight: 500; flex: 1; text-align: center; }
+
+.progress-wrap { margin-bottom: 20px; }
+.progress-labels { display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-bottom: 6px; }
+.progress-track { height: 8px; background: #e8e8e5; border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: #3b82f6; border-radius: 99px; transition: width 0.3s; }
+
+.day-card { background: #fff; border: 1px solid #e8e8e5; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
+.day-card.today { border-color: #3b82f6; }
+.day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 6px; }
+.badge-class { background: #dbeafe; color: #1d4ed8; }
+.badge-work { background: #fef3c7; color: #92400e; }
+.badge-rest { background: #f1f0ec; color: #888; border: 1px solid #e0e0dd; }
+.day-title { font-size: 14px; color: #444; }
+.day-date { font-size: 13px; color: #aaa; margin-left: auto; }
+
+.tasks { display: flex; flex-direction: column; gap: 7px; }
+.task-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 11px; border-radius: 8px; border: 1px solid #ebebeb; background: #fafafa; cursor: pointer; user-select: none; transition: background 0.1s; }
+.task-row:hover { background: #f3f3f0; }
+.task-row.done { opacity: 0.45; }
+.task-row.done .task-text { text-decoration: line-through; color: #aaa; }
+.checkbox { width: 18px; height: 18px; border: 1.5px solid #ccc; border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.task-row.done .checkbox { background: #3b82f6; border-color: #3b82f6; }
+.check-icon { color: #fff; font-size: 12px; font-weight: bold; display: none; }
+.task-row.done .check-icon { display: block; }
+.task-text { font-size: 14px; line-height: 1.5; flex: 1; }
+.task-tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; align-self: center; white-space: nowrap; }
+.tag-word { background: #dcfce7; color: #166534; }
+.tag-exam { background: #fee2e2; color: #991b1b; }
+.tag-listen { background: #ede9fe; color: #5b21b6; }
+.tag-grammar { background: #fef3c7; color: #92400e; }
+.tag-write { background: #dbeafe; color: #1d4ed8; }
+
+.rest-msg { font-size: 14px; color: #aaa; padding: 4px 0; }
+.optional-note { font-size: 12px; color: #aaa; margin-top: 8px; }
+
+.bottom-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+.reset-btn { font-size: 13px; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; }
+.reset-btn:hover { color: #666; }
+.legend { display: flex; gap: 10px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #666; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📚 TOPIK 5级备考打卡表</h1>
+  <p class="subtitle">目标：2026年10月17日 · 从延世4开始冲刺</p>
+
+  <div class="week-nav">
+    <button onclick="changeWeek(-1)">← 上周</button>
+    <span class="week-label" id="weekLabel"></span>
+    <button onclick="changeWeek(1)">下周 →</button>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span>本周必做任务完成进度</span>
+      <span id="progressText">0 / 0 项</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div id="dayCards"></div>
+
+  <div class="bottom-bar">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>单词</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>真题</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>听力</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>语法</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div>写作</div>
+    </div>
+    <button class="reset-btn" onclick="resetWeek()">重置本周</button>
+  </div>
+</div>
+
+<script>
+const DAY_TEMPLATES = [
+  { label: '周一', type: 'work', note: '上班日 18:30–20:00 (约1.5h)', tasks: [
+    { text: '背新单词 20个（默写3遍）', tag: 'tag-word', opt: false },
+    { text: '复习上次单词 10min（遮释义默写）', tag: 'tag-word', opt: false },
+    { text: '真题听力 1套（题型1–5）', tag: 'tag-listen', opt: false },
+    { text: '整理1个课堂语法点 + 造句', tag: 'tag-grammar', opt: false },
+    { text: '通勤听韩语播客/课文录音 20min', tag: 'tag-listen', opt: true },
+  ]},
+  { label: '周二', type: 'work', note: '上班日 18:30–20:00 (约1.5h)', tasks: [
+    { text: '背新单词 20个（默写3遍）', tag: 'tag-word', opt: false },
+    { text: '复习周一单词 10min', tag: 'tag-word', opt: false },
+    { text: '真题阅读 1套（选择题部分）', tag: 'tag-exam', opt: false },
+    { text: '语法仿写：2个语法点各造3句', tag: 'tag-grammar', opt: false },
+    { text: '通勤听韩语播客/课文录音 20min', tag: 'tag-listen', opt: true },
+  ]},
+  { label: '周三', type: 'class', note: '上课日 10:00–13:00 + 课后自习', tasks: [
+    { text: '课前预习单词 15min', tag: 'tag-word', opt: false },
+    { text: '上课3小时（认真记笔记）', tag: 'tag-grammar', opt: false },
+    { text: '课后当天整理笔记 20min', tag: 'tag-grammar', opt: false },
+    { text: '背新单词 20个', tag: 'tag-word', opt: false },
+    { text: '真题写作 1题（短文/说明文）', tag: 'tag-write', opt: false },
+  ]},
+  { label: '周四', type: 'rest', note: '休息日', tasks: [] },
+  { label: '周五', type: 'class', note: '上课日 10:00–13:00 + 课后自习', tasks: [
+    { text: '课前预习单词 15min', tag: 'tag-word', opt: false },
+    { text: '上课3小时（认真记笔记）', tag: 'tag-grammar', opt: false },
+    { text: '课后当天整理笔记 20min', tag: 'tag-grammar', opt: false },
+    { text: '背新单词 20个', tag: 'tag-word', opt: false },
+    { text: '真题综合 1套（听力+阅读）', tag: 'tag-exam', opt: false },
+  ]},
+  { label: '周六', type: 'rest', note: '休息日（可选内容）', tasks: [
+    { text: '延世3网课 1–2节', tag: 'tag-grammar', opt: true },
+    { text: '复习本周全部单词 20min', tag: 'tag-word', opt: true },
+    { text: '真题错题回顾 30min', tag: 'tag-exam', opt: true },
+  ]},
+  { label: '周日', type: 'rest', note: '休息日（可选内容）', tasks: [
+    { text: '听力跟读练习 20min', tag: 'tag-listen', opt: true },
+    { text: '本周语法笔记二次整理', tag: 'tag-grammar', opt: true },
+  ]},
+];
+
+const TAG_LABELS = { 'tag-word':'单词', 'tag-exam':'真题', 'tag-listen':'听力', 'tag-grammar':'语法', 'tag-write':'写作' };
+
+let currentWeekOffset = 0;
+
+function getWeekDates(offset) {
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
+  monday.setHours(0,0,0,0);
+  return Array.from({length: 7}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+function dateKey(d) { return d.toISOString().slice(0,10); }
+function storageKey(offset) { return 'topik_checklist_week_' + offset; }
+
+function loadData(offset) {
+  try { return JSON.parse(localStorage.getItem(storageKey(offset)) || '{}'); }
+  catch { return {}; }
+}
+
+function saveData(offset, data) {
+  try { localStorage.setItem(storageKey(offset), JSON.stringify(data)); } catch {}
+}
+
+let weekData = {};
+
+function toggleTask(dayIdx, taskIdx) {
+  const dates = getWeekDates(currentWeekOffset);
+  const dk = dateKey(dates[dayIdx]);
+  if (!weekData[dk]) weekData[dk] = {};
+  weekData[dk]['t'+taskIdx] = !weekData[dk]['t'+taskIdx];
+  saveData(currentWeekOffset, weekData);
+  render();
+}
+
+function fmt(d) { return (d.getMonth()+1) + '月' + d.getDate() + '日'; }
+
+function render() {
+  const dates = getWeekDates(currentWeekOffset);
+  const todayKey = dateKey(new Date());
+  document.getElementById('weekLabel').textContent =
+    fmt(dates[0]) + ' – ' + fmt(dates[6]);
+
+  let total = 0, done = 0;
+  const html = dates.map((date, i) => {
+    const tmpl = DAY_TEMPLATES[i];
+    const dk = dateKey(date);
+    const dayDone = weekData[dk] || {};
+    const isToday = dk === todayKey;
+    const required = tmpl.tasks.filter(t => !t.opt);
+
+    required.forEach((_, ti) => {
+      total++;
+      if (dayDone['t'+ti]) done++;
+    });
+
+    let tasksHtml;
+    if (tmpl.tasks.length === 0) {
+      tasksHtml = '<p class="rest-msg">今天休息，好好放松 ☕</p>';
+    } else {
+      const allOpt = tmpl.tasks.every(t => t.opt);
+      tasksHtml = '<div class="tasks">' +
+        tmpl.tasks.map((t, ti) => {
+          const isDone = !!dayDone['t'+ti];
+          return `<div class="task-row${isDone?' done':''}" onclick="toggleTask(${i},${ti})">
+            <div class="checkbox"><span class="check-icon">✓</span></div>
+            <span class="task-text">${t.opt ? '[可选] ' : ''}${t.text}</span>
+            <span class="task-tag ${t.tag}">${TAG_LABELS[t.tag]}</span>
+          </div>`;
+        }).join('') + '</div>';
+    }
+
+    const badgeCls = tmpl.type === 'class' ? 'badge-class' : tmpl.type === 'work' ? 'badge-work' : 'badge-rest';
+
+    return `<div class="day-card${isToday?' today':''}">
+      <div class="day-header">
+        <span class="badge ${badgeCls}">${tmpl.label}</span>
+        <span class="day-title">${tmpl.note}</span>
+        <span class="day-date">${fmt(date)}</span>
+      </div>
+      ${tasksHtml}
+    </div>`;
+  }).join('');
+
+  document.getElementById('dayCards').innerHTML = html;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progressText').textContent = done + ' / ' + total + ' 项';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function changeWeek(delta) {
+  currentWeekOffset += delta;
+  weekData = loadData(currentWeekOffset);
+  render();
+}
+
+function resetWeek() {
+  if (!confirm('确定重置本周所有打卡记录？')) return;
+  weekData = {};
+  saveData(currentWeekOffset, {});
+  render();
+}
+
+weekData = loadData(0);
+render();
+</script>
+</body>
+</html>
